@@ -1,6 +1,8 @@
 import os
 import json
 import math
+from dotenv import load_dotenv
+load_dotenv()
 from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
@@ -21,11 +23,11 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # LINE Bot API設定
-line_bot_api = LineBotApi("LOULtef74IiMNuzVUZ4qy+reF1vCddZI3vtcHr1x7DVdeNOM7KmPpDG1vO/e0RUyW8PKi0YyQjEF578uU4U1V+GwGBe29SPfv6iq/mT4eKQ6pm4KUcH8HqQNgPe7Q7CPMfvlZfqejN96EDEKfJ7VqAdB04t89/1O/w1cDnyilFU=")
-handler = WebhookHandler("f364bd2086c5085ad559a3bf077bcbd1")
+line_bot_api = LineBotApi(os.getenv("6S20bSBcGOYYIQI8MvDRGcAMIbUb8vjVYCb6jOAUTUTz5a9ddtjLvpaBL+lGxrVE7w4I/A/DvgKyQ1VUwaQ49pSUhvs7lIfLDotwUV2V2rOxvg9j3yMx/57u3iz1P9lcMFTh/0G5z/uZwjzhsHjBdQdB04t89/1O/w1cDnyilFU="))
+handler = WebhookHandler(os.getenv("67576e1de8c83627f461f2da53965694"))
 
 # 店家LINE User ID
-STORE_OWNER_LINE_USER_ID = "Ucb329d2f9c446978c2cdfc16420465a2"
+STORE_OWNER_LINE_USER_ID = "U20b92eb75ce168c461eebfac446a8769"
 
 # 載入服務項目
 with open('services.json', 'r', encoding='utf-8') as f:
