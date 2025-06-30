@@ -23,8 +23,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # LINE Bot API設定
-line_bot_api = LineBotApi(os.getenv("6S20bSBcGOYYIQI8MvDRGcAMIbUb8vjVYCb6jOAUTUTz5a9ddtjLvpaBL+lGxrVE7w4I/A/DvgKyQ1VUwaQ49pSUhvs7lIfLDotwUV2V2rOxvg9j3yMx/57u3iz1P9lcMFTh/0G5z/uZwjzhsHjBdQdB04t89/1O/w1cDnyilFU="))
-handler = WebhookHandler(os.getenv("67576e1de8c83627f461f2da53965694"))
+line_bot_api = LineBotApi(os.getenv("CHANNEL_ACCESS_TOKEN"))
+handler = WebhookHandler(os.getenv("CHANNEL_SECRET"))
+
+
 
 # 店家LINE User ID
 STORE_OWNER_LINE_USER_ID = "U20b92eb75ce168c461eebfac446a8769"
