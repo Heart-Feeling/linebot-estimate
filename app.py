@@ -2,8 +2,11 @@ import os
 import json
 import math
 from dotenv import load_dotenv
-load_dotenv()
-from flask import Flask, request, abort
+from pathlib import Path
+
+dotenv_path = Path('.env')
+load_dotenv(dotenv_path=dotenv_path)
+from flask import Flask, request, abort, render_template
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (
@@ -23,6 +26,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # LINE Bot API設定
+print("🔍 讀到的 TOKEN 是：", os.getenv("CHANNEL_ACCESS_TOKEN"))
 line_bot_api = LineBotApi(os.getenv("CHANNEL_ACCESS_TOKEN"))
 handler = WebhookHandler(os.getenv("CHANNEL_SECRET"))
 
@@ -144,13 +148,19 @@ def create_estimate_flex_message(session, selected_items):
     # 建立項目明細
     items_components = []
     for item in selected_items:
+        remark = item.get('remark', '')
+        item_text = f"▫️ {item['name']} ×{item['quantity']}{item['unit']} ➜ NT${item['total_low']:,} ~ NT${item['total_high']:,}"
+        if remark:
+            item_text += f"\n  📌 {remark}"
+
         items_components.append(
             TextComponent(
-                text=f"▫️ {item['name']} ×{item['quantity']}{item['unit']} ➜ NT${item['total_low']:,} ~ NT${item['total_high']:,}",
+                text=item_text,
                 size="sm",
                 wrap=True
             )
         )
+
     
     bubble = BubbleContainer(
         body=BoxComponent(
@@ -207,6 +217,10 @@ def create_estimate_flex_message(session, selected_items):
     )
     
     return FlexSendMessage(alt_text="估價單", contents=bubble)
+
+@app.route("/form", methods=["GET"])
+def show_form():
+    return render_template("form.html")
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -682,6 +696,84 @@ def handle_postback(event):
         
         reply_message = create_service_selection_message(1)
         line_bot_api.reply_message(event.reply_token, reply_message)
+
+@app.route('/submit-form', methods=['POST'])
+def submit_form():
+    try:
+        data = request.form.to_dict()
+        print("📥 收到表單資料：", data)
+
+        user_id = data.get("user_id")
+        name = data.get("name")
+        phone = data.get("phone")
+        address = data.get("address")
+        visit_time = data.get("visit_time")
+
+        # 處理選項
+        selected_items = []
+        total_low = 0
+        total_high = 0
+
+        for key, value in data.items():
+            if key.startswith("service_") and value.isdigit():
+                service_name = key.replace("service_", "")
+                quantity = int(value)
+                service = next((s for s in SERVICES if s['name'] == service_name), None)
+                if service:
+                    price_low = service['price_low'] or 0
+                    price_high = service['price_high'] or 0
+                    item = {
+                        "name": service_name,
+                        "unit": service["unit"],
+                        "quantity": quantity,
+                        "price_low": price_low,
+                        "price_high": price_high,
+                        "total_low": price_low * quantity,
+                        "total_high": price_high * quantity
+                    }
+                    total_low += item["total_low"]
+                    total_high += item["total_high"]
+                    selected_items.append(item)
+
+        # 存入資料庫
+        estimate = Estimate(
+            line_user_id=user_id,
+            name=name,
+            phone=phone,
+            address=address,
+            visit_time=visit_time,
+            items=json.dumps(selected_items, ensure_ascii=False),
+            total_low=total_low,
+            total_high=total_high,
+            status="confirmed"
+        )
+        db.session.add(estimate)
+        db.session.commit()
+
+        # 通知店家
+        detail_lines = [
+            f"▫️ {item['name']} ×{item['quantity']}{item['unit']} ➜ NT${item['total_low']} ~ NT${item['total_high']}"
+            for item in selected_items
+        ]
+        detail_text = "\n".join(detail_lines)
+        notification = f"""💬 有一筆新的 LIFF 表單估價單：
+👤 {name}｜📞 {phone}
+📍 {address}
+⏰ {visit_time}
+🧾 項目明細：
+{detail_text}
+
+💰 總金額：NT${total_low:,} ~ NT${total_high:,}
+"""
+
+        line_bot_api.push_message(STORE_OWNER_LINE_USER_ID, TextSendMessage(text=notification))
+
+        return "OK"
+
+    except Exception as e:
+        print("❌ 表單提交處理失敗：", e)
+        return "錯誤：" + str(e), 500
+
 
 @app.route('/')
 def index():

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>線上估價單</title>
+  <style>
+    body {
+      font-family: "Microsoft JhengHei", sans-serif;
+      margin: 20px;
+    }
+    h2 {
+      color: green;
+    }
+    .item {
+      margin-bottom: 8px;
+    }
+    input[type="number"] {
+      width: 60px;
+    }
+  </style>
+</head>
+<body>
+  <h2>✅ 估價表單頁面載入成功</h2>
+  <form id="estimateForm">
+    <div class="items"></div>
+
+    <hr>
+    <p><strong>📌 聯絡資料</strong></p>
+    <label>姓名：<input type="text" name="name" required></label><br>
+    <label>電話：<input type="tel" name="phone" required></label><br>
+    <label>地址：<input type="text" name="address" required></label><br>
+    <label>勘場時間：<input type="text" name="time" required></label><br>
+    <input type="hidden" name="user_id" id="user_id">
+    <br><button type="submit">📤 送出估價</button>
+  </form>
+
+  <script>
+    const services = [
+      {"name": "新增220V插座", "unit": "處", "price_low": 800, "price_high": 1800,"remark": "12MM內依現場施工難易度，如需配管或鑿牆另計"},
+      {"name": "新增110v插座(含線路)", "unit": "處", "price_low": 800, "price_high": 1800,"remark": "12MM內依現場施工難易度，如需配管或鑿牆另計"},
+      {"name": "新增110v電源迴路(2.0MM)", "unit": "迴", "price_low": 2000, "price_high": 3500,"remark": "15MM內依現場施工難易度，如需配管或鑿牆另計"},
+      {"name": "新增220v電源迴路(5.5MM)", "unit": "迴", "price_low": 3800, "price_high": 5800,"remark": "15MM內依現場施工難易度，如需配管或鑿牆另計"},
+      {"name": "電源開關(單切)", "unit": "組", "price_low": 1800, "price_high": 3000,"remark": "12MM內依現場施工難易度，如需配管或鑿牆另計"},
+      {"name": "電源開關(雙切)", "unit": "組", "price_low": 2500, "price_high": 4500,"remark": "12MM內依現場施工難易度，如需配管或鑿牆另計"},
+      {"name": "電源迴路", "unit": "迴", "price_low": 2000, "price_high": 3500,"remark": "15MM內依現場施工難易度，如需配管或鑿牆另計"},
+      {"name": "插座/開關更換", "unit": "組", "price_low": 200, "price_high": 800,"remark": "不含特殊面板"},
+      {"name": "斷路器(附漏電)", "unit": "組", "price_low": 800, "price_high": 1200,"remark": ""},
+      {"name": "斷路器", "unit": "組", "price_low": 300, "price_high": 1000,"remark": ""},
+      {"name": "獨立電表安裝(私表)", "unit": "只", "price_low": 1500, "price_high": 2000,"remark": ""},
+      {"name": "開關箱/防水箱安裝", "unit": "組", "price_low": 500, "price_high": 2000,"remark": "不含設備"},
+      {"name": "熱水器安裝(儲熱式)", "unit": "式", "price_low": 2500, "price_high": 6500,"remark": "不含設備，配管配線另計"},
+      {"name": "熱水器安裝(即熱式)", "unit": "式", "price_low": 2000, "price_high": 3000,"remark": "不含設備，配管配線另計"},
+      {"name": "加壓(抽水)馬達更換", "unit": "式", "price_low": 1500, "price_high": 3500,"remark": "不含設備，配管配線另計"},
+      {"name": "新增冷水出口4分PVC", "unit": "處", "price_low": 1800, "price_high": 3500,"remark": "12MM內依現場施工難易度，如需配管或鑿牆另計"},
+      {"name": "新增熱水出口4分不銹鋼(附壓接管)", "unit": "處", "price_low": 2500, "price_high": 5800,"remark": "12MM內依現場施工難易度，如需配管或鑿牆另計"},
+      {"name": "新增排水口2分PVC", "unit": "處", "price_low": 2000, "price_high": 6000,"remark": "15MM內依現場施工難易度，如需配管或鑿牆另計"},
+      {"name": "馬桶安裝", "unit": "式", "price_low": 1500, "price_high": 3500,"remark": "不含設備，配管另計，依現場施工難易度"},
+      {"name": "面盆安裝", "unit": "式", "price_low": 800, "price_high": 2000,"remark": "不含設備，配管另計，依現場施工難易度"},
+      {"name": "龍頭安裝", "unit": "式", "price_low": 200, "price_high": 1200,"remark": "不含設備，配管另計，依現場施工難易度"},
+      {"name": "LED崁燈安裝(含開孔)", "unit": "式", "price_low": 200, "price_high": 800,"remark": "不含燈具，配線另計"},
+      {"name": "吸頂燈/壁燈/日光燈/吊燈安裝", "unit": "式", "price_low": 200, "price_high": 1500,"remark": "不含燈具，配線另計"},
+      {"name": "軌道燈安裝", "unit": "M", "price_low": 150, "price_high": 400,"remark": "不含設備，配線另計，總工資達1200以上按此價格"},
+      {"name": "燈具線路配線", "unit": "處", "price_low": 300, "price_high": 800,"remark": "6MM內依現場施工難易度，如需配管或鑿牆另計"},
+      {"name": "線路查修/檢修", "unit": "式", "price_low": 800, "price_high": 2500,"remark": "按時長計算"},
+      {"name": "馬桶/小便斗疏通", "unit": "式", "price_low": 1500, "price_high": 2500,"remark": ""},
+      {"name": "水管疏通", "unit": "式", "price_low": 1500, "price_high": 3500,"remark": ""},
+      {"name": "弱電及監視系統", "unit": "項目", "remark": ""},
+      {"name": "老屋翻新", "unit": "項目", "remark": ""},
+      {"name": "其他工程", "unit": "項目", "remark": ""}
+    ];
+
+    const container = document.querySelector(".items");
+    services.forEach(service => {
+      const div = document.createElement("div");
+      div.className = "item";
+      let remarkHTML = service.remark ? `<div style="font-size: 0.85em; color: #888;">📝 ${service.remark}</div>` : "";
+      div.innerHTML = `
+        <label>${service.name}（${service.unit}）：
+          <input type="number" name="${service.name}" min="0" value="0">
+        </label>
+        ${remarkHTML}`;
+      container.appendChild(div);
+    });
+
+    document.getElementById("estimateForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const data = {};
+      formData.forEach((value, key) => {
+        data[key] = value;
+      });
+
+      fetch("/submit-form", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => {
+        if (response.ok) {
+          alert("✅ 已送出估價！");
+        } else {
+          alert("❌ 送出失敗，請稍後再試。");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+
