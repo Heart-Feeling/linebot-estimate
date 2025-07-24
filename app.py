@@ -148,6 +148,7 @@ def create_estimate_flex_message(session, selected_items):
     # 建立項目明細
     items_components = []
     for item in selected_items:
+        print(item)
         remark = item.get('remark', '')
         item_text = f"▫️ {item['name']} ×{item['quantity']}{item['unit']} ➜ NT${item['total_low']:,} ~ NT${item['total_high']:,}"
         if remark:
@@ -446,7 +447,8 @@ def handle_message(event):
                 'price_low': service['price_low'],
                 'price_high': service['price_high'],
                 'total_low': total_low,
-                'total_high': total_high
+                'total_high': total_high,
+                'remark': service.get('remark', '')
             })
             session.selected_items = json.dumps(selected_items)
             session.current_step = "selecting"
