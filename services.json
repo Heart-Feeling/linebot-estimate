@@ -27,7 +27,7 @@
   {"name": "線路查修/檢修", "unit": "式", "price_low": 800, "price_high": 2500,"remark": "按時長計算"},
   {"name": "馬桶/小便斗疏通", "unit": "式", "price_low": 1500, "price_high": 2500,"remark": ""},
   {"name": "水管疏通", "unit": "式", "price_low": 1500, "price_high": 3500,"remark": ""},
-  {"name": "弱電及監視系統", "unit": "項目", "remark": ""},
-  {"name": "老屋翻新", "unit": "項目", "remark": ""},
-  {"name": "其他工程", "unit": "項目", "remark": ""}
+  {"name": "弱電及監視系統", "unit": "項目", "price_low": 0, "price_high": 0,"remark": "需討論，依現場實際為主"},
+  {"name": "老屋翻新", "unit": "項目", "price_low": 0, "price_high": 0,"remark": "需討論，依現場實際為主"},
+  {"name": "其他工程", "unit": "項目", "price_low": 0, "price_high": 0,"remark": "需討論，依現場實際為主"}
 ]

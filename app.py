@@ -152,21 +152,21 @@ def create_estimate_flex_message(session, selected_items):
         remark = item.get('remark', '')
 
     # 🔧 專人估價的處理
-    if item['total_low'] == 0 and item['total_high'] == 0:
-        item_text = f"▫️ {item['name']} ×{item['quantity']}{item['unit']} ➜ 💬 將由專人聯繫報價"
-    else:
-        item_text = f"▫️ {item['name']} ×{item['quantity']}{item['unit']} ➜ NT${item['total_low']:,} ~ NT${item['total_high']:,}"
+        if item['total_low'] == 0 and item['total_high'] == 0:
+            item_text = f"▫️ {item['name']} ×{item['quantity']}{item['unit']} ➜ 💬 將由專人聯繫報價"
+        else:
+            item_text = f"▫️ {item['name']} ×{item['quantity']}{item['unit']} ➜ NT${item['total_low']:,} ~ NT${item['total_high']:,}"
 
-    if remark:
-        item_text += f"\n  📌 {remark}"
+        if remark:
+            item_text += f"\n  📌 {remark}"
 
-    items_components.append(
-        TextComponent(
-            text=item_text,
-            size="sm",
-            wrap=True
+        items_components.append(
+            TextComponent(
+                text=item_text,
+                size="sm",
+                wrap=True
+            )
         )
-    )
 
     
     bubble = BubbleContainer(
